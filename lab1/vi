@@ -1,0 +1,7 @@
+#!/bin/bash
+
+#cat /var/log/anaconda/X.log
+
+awk '{ if($3 == "(**)") { $3 = "WARNING:"; print $0 } }' /var/log/anaconda/X.log > full.log
+awk '{ if($3 == "(II)") { $3="INFORMATION:"; print $0} }' /var/log/anaconda/X.log >> full.log
+cat full.log

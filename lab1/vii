@@ -1,0 +1,4 @@
+#!/bin/bash
+
+cat $(dir /etc | awk '{print "/etc/"$0}') | grep $\<[A-Za-z0-9]*@[a-z]*[.][a-z]*\>^$ > emails.list
+

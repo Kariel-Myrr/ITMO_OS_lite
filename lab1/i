@@ -1,0 +1,10 @@
+#!/bin/bash
+let a=$1
+for i in $2 $3
+	do
+	if [[ $i -gt $a ]]
+	then a=$i
+	fi
+	done
+echo "$a"
+

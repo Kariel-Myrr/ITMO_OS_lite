@@ -1,0 +1,12 @@
+#!/bin/bash
+read buff
+let str
+
+while [[ "$buff" != "q" ]]
+do
+str="$str$buff"
+read buff
+done
+
+echo "$str"
+
