@@ -1,0 +1,22 @@
+#!/bin/bash
+
+ps ax | awk 'system("test -d /proc/" $1)==0 {
+
+get_ppid_cmd = "cat /proc/"$1"/status | grep PPid | awk \47{print $2}\47"
+get_ppid_cmd | getline ppid
+close(get_ppid_cmd)
+
+get_sum_exec_runtime_cmd = "cat /proc/"$1"/sched | grep sum_exec_runtime | awk \47{print $3}\47"
+get_sum_exec_runtime_cmd | getline sum_exec_runtime
+close(get_sum_exec_runtime_cmd)
+
+get_nr_switches_cmd = "cat /proc/"$1"/sched | grep nr_switches | awk \47{print $3}\47"
+get_nr_switches_cmd | getline nr_switches
+close(get_nr_switches)
+
+printf "ProcessID = %s : Parent_ProcessID = %s : Average_Running_Time = %s \n",
+$1,
+ppid,
+sum_exec_runtime/nr_switches
+
+}' | sort -nk7 > ps_ART
