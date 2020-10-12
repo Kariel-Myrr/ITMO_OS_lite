@@ -1,0 +1,9 @@
+#!/bin/bash
+
+awk -F \# '{ if($2 == "!\/bin\/bash") { 
+print "\#\!\/bin\/bash"
+}
+else {
+print $1
+}
+}' $1

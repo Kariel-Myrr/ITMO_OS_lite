@@ -1,5 +1,10 @@
 #!/bin/bash
 
+let cnt=0
+let sum_art=0
+let art=0
+let last_pid=0
+
 ps -eo pid,ppid | sort -nk2 | awk 'system("test -d /proc/" $1)==0 {
 
 #mb our pr pid that we got from ps alredy dead, and we have new one with same ppid
@@ -15,9 +20,24 @@ get_nr_switches_cmd = "cat /proc/"$1"/sched | grep nr_switches | awk \47{print $
 get_nr_switches_cmd | getline nr_switches
 close(get_nr_switches)
 
-printf "ProcessID = %s : Parent_ProcessID = %s : Average_Running_Time = %s \n",
+printf "%s %s %s \n",
 $1,
-$2,
-sum_exec_runtime/nr_switches
+sum_exec_runtime/nr_switches,
+$2
 
-}' > ps_ART
+}' | uniq -f2 --group=append | sed -e "s/^$/EVRG_DATA/" | while read p; do
+	if [[ "$p" -ne "EVRG_DATA" ]]
+	then
+		last_pid=$(echo $p | cut -d" " -f3)
+		art=$(echo $p | cut -d" " -f2)
+		sum_art=$((sum_art+art))
+		cnt=$((cnt+1))
+		echo $p | awk '{print "PID : "$1" PPID : "$2" Average_Sleeping_Time : "$3}'
+	else
+		echo $last_pid $((sum_art\cnt)) | awk '{
+			printf "Avarege_Sleeping_Children_Of_ParentId = %s is %s\n", $1, $2
+		}'
+		cnt=0
+		sum_art=0
+	fi
+done
