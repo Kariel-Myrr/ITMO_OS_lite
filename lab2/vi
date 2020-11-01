@@ -1,0 +1,19 @@
+#!/bin/bash
+
+let max_vm=0
+max_pid=""
+
+for pid in $(ps axo pid | sed "1d");
+do
+	cur_vm=$(grep -s -E "^VmSize" "/proc/$pid/status" | cut -d" " -f2)
+	if [[ $cur_vm -ge $max ]]
+	then
+		max_vm=$cur_vm
+		max_pid=$pid
+	fi
+done
+
+top_stat=$(top -b -n1 | sed "1,7d" | sort -k5 -g | tail -n1 | awk '{print $1 " " $5 }')
+
+echo "With /proc $max_pid $max_vm"
+echo "With top $top_stat"

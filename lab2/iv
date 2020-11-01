@@ -1,23 +1,21 @@
 #!/bin/bash
 
-ps -eo pid,ppid | sort -nk2 | awk 'system("test -d /proc/" $1)==0 {
+function lineWith {
+echo $(grep -s -E $1 /proc/$pid/$2)
+}
 
-#mb our pr pid that we got from ps alredy dead, and we have new one with same ppid
-#get_ppid_cmd = "cat /proc/"$1"/status | grep PPid | awk \47{print $2}\47"
-#get_ppid_cmd | getline ppid
-#close(get_ppid_cmd)
+for pid in $(ps axo pid | sed "1d");
+do
+	ppid=$(lineWith "^PPid:" status | awk '{print $2}' )
+	sum_runtime=$(lineWith "^se.sum_exec_runtime" sched | awk '{print $3}' )
+	switches=$(lineWith "^nr_switches" sched | awk '{print $3}' )
+	if [ -z $sum_runtime ] || [ -z $switches ]
+	then continue
+	fi
+	art=$(echo $sum_runtime / $switches | bc -l)
 
-get_sum_exec_runtime_cmd = "cat /proc/"$1"/sched | grep sum_exec_runtime | awk \47{print $3}\47"
-get_sum_exec_runtime_cmd | getline sum_exec_runtime
-close(get_sum_exec_runtime_cmd)
+	echo "$pid $ppid $art";
+done  |
+	sort -n --key=2 |
+	awk '{print "ProcessID="$1" Parent_ProcessID="$2" Average_Running_Time="$3}' > iv_ans
 
-get_nr_switches_cmd = "cat /proc/"$1"/sched | grep nr_switches | awk \47{print $3}\47"
-get_nr_switches_cmd | getline nr_switches
-close(get_nr_switches)
-
-printf "ProcessID = %s : Parent_ProcessID = %s : Average_Running_Time = %s \n",
-$1,
-$2,
-sum_exec_runtime/nr_switches
-
-}' > ps_ART

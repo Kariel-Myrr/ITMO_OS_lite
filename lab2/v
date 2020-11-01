@@ -1,43 +1,28 @@
 #!/bin/bash
 
-let cnt=0
-let sum_art=0
-let art=0
-let last_pid=0
+ANS="v_ans"
 
-ps -eo pid,ppid | sort -nk2 | awk 'system("test -d /proc/" $1)==0 {
+echo "" > $ANS
 
-#mb our pr pid that we got from ps alredy dead, and we have new one with same ppid
-#get_ppid_cmd = "cat /proc/"$1"/status | grep PPid | awk \47{print $2}\47"
-#get_ppid_cmd | getline ppid
-#close(get_ppid_cmd)
+let lastPpid=0
+let artSum=0
+let artAmn=0
+while read line ;
+do
+	ppid=$(echo $line | cut -d" " -f2 | cut -d= -f2)
+	art=$(echo $line | cut -d" " -f3 | cut -d= -f2)
 
-get_sum_exec_runtime_cmd = "cat /proc/"$1"/sched | grep sum_exec_runtime | awk \47{print $3}\47"
-get_sum_exec_runtime_cmd | getline sum_exec_runtime
-close(get_sum_exec_runtime_cmd)
-
-get_nr_switches_cmd = "cat /proc/"$1"/sched | grep nr_switches | awk \47{print $3}\47"
-get_nr_switches_cmd | getline nr_switches
-close(get_nr_switches)
-
-printf "%s %s %s \n",
-$1,
-sum_exec_runtime/nr_switches,
-$2
-
-}' | uniq -f2 --group=append | sed -e "s/^$/EVRG_DATA/" | while read p; do
-	if [[ "$p" -ne "EVRG_DATA" ]]
+	if [[ $ppid != $lastPpid ]]
 	then
-		last_pid=$(echo $p | cut -d" " -f3)
-		art=$(echo $p | cut -d" " -f2)
-		sum_art=$((sum_art+art))
-		cnt=$((cnt+1))
-		echo $p | awk '{print "PID : "$1" PPID : "$2" Average_Sleeping_Time : "$3}'
-	else
-		echo $last_pid $((sum_art\cnt)) | awk '{
-			printf "Avarege_Sleeping_Children_Of_ParentId = %s is %s\n", $1, $2
-		}'
-		cnt=0
-		sum_art=0
+		echo "Average_Sleeping_Children_of_ParentID=$lastPpid is $(echo $artSum / $artAmn | bc -l)" >> $ANS
+		artSum=0
+		artAmn=0
 	fi
-done
+
+	echo $line >> $ANS
+	lastPpid=$ppid
+	artSum=$(echo $artSum + $art | bc -l)
+	artAmn=$(echo $artAmn + 1 | bc -l)
+done < iv_ans
+
+echo "Average_Sleeping_Children_of_ParentID=$lastPpid is $(echo $artSum / $artAmn | bc -l)" >> $ANS

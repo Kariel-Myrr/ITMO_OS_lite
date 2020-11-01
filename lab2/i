@@ -1,5 +1,5 @@
 #!/bin/bash
 
-ps aux | awk '{ if($1 == "root") print }' | wc -l > myPS
+ps | sed "1d" | awk '{print $1 ": " $4}' > i_ans
+echo -e "$(cat i_ans | wc -l) \n$(cat i_ans)" > i_ans
 
-ps aux | awk '{ if($1 == "root") print $2":"$(11)}' >> myPS
