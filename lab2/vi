@@ -6,7 +6,7 @@ max_pid=""
 for pid in $(ps axo pid | sed "1d");
 do
 	cur_vm=$(grep -s -E "^VmSize" "/proc/$pid/status" | cut -d" " -f2)
-	if [[ $cur_vm -ge $max ]]
+	if [[ $cur_vm -ge $max_vm ]]
 	then
 		max_vm=$cur_vm
 		max_pid=$pid

@@ -8,7 +8,7 @@ echo "" > $ANS
 
 for pid in $(ps axo pid | sed "1d");
 do
-	read_mem=$(sudo grep -s -E "^read_bytes" "/proc/$pid/io" | cut -d" " -f2)
+	read_mem=$(sudo grep -s read_bytes "/proc/$pid/io" | cut -d" " -f2)
 	echo "$pid $read_mem" >> $TMP
 done;
 
@@ -16,14 +16,21 @@ sleep 10s #for real put 60s
 
 for pid in $(ps axo pid | sed "1d");
 do
-	cmd=$(cat "/proc/$pid/cmdline")
-	read_mem=$(sudo grep -s -E "^read_bytes" "/proc/$pid/io" | cut -d" " -f2)
+	read_mem=$(sudo grep -s read_bytes "/proc/$pid/io" | cut -d" " -f2)
 	prev_read_mem=$(grep -E "^$pid" $TMP | cut -d" " -f2)
-	if [[ -z $prev_read_mem ]]
-		then prev_read_mem=0
+	if [[ -z $read_mem ]]
+	then
+		read_mem=0
+		cmdL="dead"
+	else
+		cmdL=$(cat /proc/$pid/cmdline || echo "dead")
 	fi
-	delta_mem=$((read_mem - prev_read_mem))
-	echo "$pid:$cmd:$delta_mem" >> $ANS
+	if [[ -z $prev_read_mem ]]
+	then
+		prev_read_mem=0
+	fi
+	delta_mem=$(echo "$read_mem - $prev_read_mem" | bc -l)
+	echo "$pid:$cmdL:$delta_mem" >> $ANS
 done
 
 sort -t":" -k3 -g $ANS | tail -n3 

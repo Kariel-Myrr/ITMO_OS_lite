@@ -1,0 +1,19 @@
+#!/bin/bash
+x=1
+MODE="run"
+usrSignal(){
+	MODE="stop"
+}
+trap 'usrSignal' USRS
+while true;
+do
+	case $MODE in
+		"run")
+			let x=$x+1
+			;;
+		"stop")
+			sudo kill $$
+			;;
+	esac
+	sleep 1
+done

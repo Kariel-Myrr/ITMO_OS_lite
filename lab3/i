@@ -1,0 +1,6 @@
+#!/bin/bash
+
+date=$(date +"%d.%m.%Y_%H:%M:%S")
+mkdir ~/test && echo "catalog test was created successfully" >> ~/report.log && touch ~/test/$date.log
+ping -c 1 www.net_nikogo.ru || echo $(date +"%d.%m.%Y_%H:%M:%S) 'Server inccessible.' >> ~/report.log
+

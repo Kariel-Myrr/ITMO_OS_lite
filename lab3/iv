@@ -1,0 +1,11 @@
+#!/bin/bash
+nice -n 8 ./inf &
+nice -n 0 ./inf &
+nice -n 1 ./inf &
+touch tmp.log
+top -u root -b -n 1 | grep inf > tmp.log
+pid1=$(awk '$4==8 {print $1}' tmp.log)
+pid3=$(awk '$4==1 {print $1}' tmp.log)
+rm tmp.log
+#cpulimit -p $pid1 -l 10 -b
+sudo kill -USRS $pid3 &

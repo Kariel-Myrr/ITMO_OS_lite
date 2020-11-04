@@ -1,5 +1,9 @@
 #!/bin/bash
 
-ps ax -o pid,start_time --sort=start_time | tail -n5 | head -n1
+for pr in (ps ax -o pid,start_time --sort=start_time | tail -n5)
+do
+	awk pr '{ if() print $0}'
+
+done
 
 
